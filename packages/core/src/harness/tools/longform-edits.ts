@@ -109,7 +109,11 @@ export function createWriteTruthFileTool(
           if (!params.bookRulesData) {
             throw new Error("write_truth_file requires bookRulesData when replacing book_rules.md");
           }
-          const data = BookRulesSchema.parse({ version: "2", ...params.bookRulesData });
+          const submittedData = { ...params.bookRulesData } as Record<string, unknown>;
+          if (typeof submittedData.fanficMode === "string" && submittedData.fanficMode.trim() === "") {
+            delete submittedData.fanficMode;
+          }
+          const data = BookRulesSchema.parse({ version: "2", ...submittedData });
           await commitAtomicFileSet({
             rootDir: state.bookDir(bookId),
             writes: [

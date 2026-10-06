@@ -18,7 +18,7 @@ export const BookRulesDataToolSchema = Type.Object({
   narrativePerson: Type.Optional(Type.String({ description: "Narrative person in the user's own terms." })),
   prohibitions: Type.Array(Type.String()),
   enableFullCastTracking: Type.Boolean(),
-  fanficMode: Type.Optional(Type.String()),
+  fanficMode: Type.Optional(Type.String({ minLength: 1, description: "Fanfic mode. Omit entirely for non-fanfic works." })),
   allowedDeviations: Type.Array(Type.String()),
 });
 

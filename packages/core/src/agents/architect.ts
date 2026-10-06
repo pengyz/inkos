@@ -303,7 +303,11 @@ ${reviseFrom.userFeedback || "（无）"}
       },
       { temperature: input.temperature },
     );
-    const bookRulesData = BookRulesSchema.parse({ version: "2", ...details.bookRulesData });
+    const submittedRules = { ...details.bookRulesData } as Record<string, unknown>;
+    if (typeof submittedRules.fanficMode === "string" && submittedRules.fanficMode.trim() === "") {
+      delete submittedRules.fanficMode;
+    }
+    const bookRulesData = BookRulesSchema.parse({ version: "2", ...submittedRules });
     const initialHooks: HookRecord[] = details.pendingHooks.map((hook) => ({
       hookId: hook.hookId.trim(),
       startChapter: 0,
