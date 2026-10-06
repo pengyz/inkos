@@ -41,7 +41,7 @@ const FoundationRevisionParams = Type.Object({
 const WriteChaptersParams = Type.Object({
   instruction: Type.String(),
   bookId: Type.Optional(Type.String()),
-  startChapterNumber: Type.Integer({ minimum: 1, description: "First chapter in the requested writing range. Use the author's target, or inspect current progress for a request to continue. Existing chapters require revision, not another append." }),
+  startChapterNumber: Type.Optional(Type.Integer({ minimum: 1, description: "First chapter in the requested writing range. Use the author's target, or inspect current progress for a request to continue. Existing chapters require revision, not another append. Omit to append at the next unwritten chapter." })),
   chapterCount: Type.Optional(Type.Integer({ minimum: 1 })),
   chapterWordCount: Type.Optional(Type.Integer({ minimum: 1 })),
 });
@@ -219,8 +219,9 @@ export function createWriteChaptersTool(
           kind: results.length === 1 ? "chapter_written" : "chapters_written",
           bookId,
           requestedCount: count,
-          startChapterNumber: params.startChapterNumber,
-          endChapterNumber: params.startChapterNumber + count - 1,
+          ...(params.startChapterNumber !== undefined
+            ? { startChapterNumber: params.startChapterNumber, endChapterNumber: params.startChapterNumber + count - 1 }
+            : { endChapterNumber: first?.chapterNumber ?? count }),
           completedCount: results.length,
           ...(delivery?{delivery}:{}),
           observations,

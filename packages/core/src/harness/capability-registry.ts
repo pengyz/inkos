@@ -102,7 +102,18 @@ export class CapabilityRegistry {
   ): Promise<ActionResult> {
     const { action } = this.resolve(capabilityId, actionId);
     if (context.signal?.aborted) throw context.signal.reason;
-    const input = Value.Decode(action.parameters, rawInput);
+    let input: Static<TSchema>;
+    try {
+      input = Value.Decode(action.parameters, rawInput);
+    } catch (error) {
+      const issues = [...Value.Errors(action.parameters, rawInput)]
+        .slice(0, 8)
+        .map((issue) => `${issue.path || "/"}: ${issue.message}`);
+      throw new Error(
+        `Action ${capabilityId}.${actionId} received invalid input: ${issues.join("; ") || String(error)}`,
+        { cause: error },
+      );
+    }
     return ActionResultSchema.parse(await action.execute(context, input));
   }
 }
