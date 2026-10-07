@@ -190,10 +190,13 @@ writeCommand
         if (!opts.json) log(`Removed: ${f}`);
       }
 
-      // Remove from index (and all chapters after it)
+      // Remove from index (and all chapters after it). Rewriting chapter 1 of a
+      // single-chapter book legitimately trims the index to empty; the guard in
+      // saveChapterIndexAt exists for accidental wipes, not for this path — the
+      // remaining files are removed right after and the chapter is regenerated.
       const index = await state.loadChapterIndex(bookId);
       const trimmed = index.filter((ch) => ch.number < chapter);
-      await state.saveChapterIndex(bookId, trimmed);
+      await state.saveChapterIndex(bookId, trimmed, { allowEmptyWithChapterFiles: true });
 
       // Also remove later chapter files since state will be rolled back
       const laterFiles = files.filter((f) => {
